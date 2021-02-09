@@ -1,25 +1,29 @@
 '''
-version 2.4
-instead of using date and time to create custom file names the code now uses the "try" tool to name each file numarically starting at 0
+version 2.5
+Similar to the last version just makes the files in their own folder a directory down
+Will also make the log file directory if it does not exist
 '''
 from random import randint
 import time
+import os
 
 #user inputs
 streakGoal=int(input("How long do you want the streak to be?\n\t"))
 goal=int(input("how many times do you want to run the simulation?\n\t")) 
 
-#creats log file
+#creats log file and creates directory if neceissary
 filecounter=0
 filename=''
 while True:
     try:
-        filename='logfile'+str(filecounter)+'.TXT'
+        filename='log-folder\logfile'+str(filecounter)+'.TXT'
         with open(filename,'x') as file:
-            file.write("New simulation started on: "+str(time.asctime())+"\nStreak target: "+str(streakGoal)+"\number of cycles: "+str(goal)+"\n\n")
+            file.write("New run started on: "+str(time.asctime())+"\nStreak target: "+str(streakGoal)+"\nNumber of cycles: "+str(goal)+"\n\n")
         break
     except FileExistsError:
         filecounter+=1
+    except FileNotFoundError:
+        os.mkdir('log-folder')
 
 print("beginning run")
 absolutetime=time.time()
@@ -60,3 +64,4 @@ while goal>counter:
         file.write("time: "+str(finalTime)+" millisecond(s)\n\n")
 with open(filename, 'a') as file:
     file.write("Total run time: "+str((time.time()-absolutetime)*1000)+' millisecond(s)\n')
+
