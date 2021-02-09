@@ -1,7 +1,7 @@
 '''
-version 2.5
-Similar to the last version just makes the files in their own folder a directory down
-Will also make the log file directory if it does not exist
+version 2.6
+Minor changes to a bunch things
+no change in overall opperation or function
 '''
 from random import randint
 import time
@@ -16,14 +16,15 @@ filecounter=0
 filename=''
 while True:
     try:
-        filename='log-folder\logfile'+str(filecounter)+'.TXT'
+        filename='log-folder\logfile{}.TXT'.format(filecounter)
         with open(filename,'x') as file:
-            file.write("New run started on: "+str(time.asctime())+"\nStreak target: "+str(streakGoal)+"\nNumber of cycles: "+str(goal)+"\n\n")
+            file.write("New run started on: {}\nStreak target: {}\nNumber of cycles: {}\n\n".format(time.asctime(),streakGoal,goal))
         break
     except FileExistsError:
         filecounter+=1
     except FileNotFoundError:
         os.mkdir('log-folder')
+        print("Made new log folder") 
 
 print("beginning run")
 absolutetime=time.time()
@@ -31,7 +32,7 @@ counter=0
 
 while goal>counter:
     counter+=1
-    print("Beginning cycle "+str(counter))
+    print("Beginning cycle {}".format(counter))
     totalflips=0
     streakHeads=0
     streakTails=0
@@ -58,10 +59,8 @@ while goal>counter:
                 streakTailsRecord=streakTails
     finalTime=(time.time()*1000)-startTime
     with open(filename, 'a') as file:
-        file.write("cycle: "+str(counter)+'\n')
-        file.write("flips: "+str(totalflips)+'\n')
-        file.write("heads: "+str(streakHeadsRecord)+"\ntails: "+str(streakTailsRecord)+'\n')
-        file.write("time: "+str(finalTime)+" millisecond(s)\n\n")
-with open(filename, 'a') as file:
-    file.write("Total run time: "+str((time.time()-absolutetime)*1000)+' millisecond(s)\n')
+        file.write("cycle: {}\nflips: {}\nheads: {}\ntails: {}\ntime: {} millisecond(s)\n\n".format(counter,totalflips,streakHeadsRecord,streakTailsRecord,finalTime))
 
+with open(filename, 'a') as file:
+    file.write("Total run time: {} millisecond(s)\n".format((time.time()-absolutetime)*1000))
+print("\nResults are in logfile{}".format(filecounter))
