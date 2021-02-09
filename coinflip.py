@@ -1,13 +1,11 @@
 '''
-A basic coin flip simulation
-Will ask you how many times you want to "flip the coin"
-and return the total number of heads and tails and the longest streak of heads and tails in the python terminal
+Instead of asking for a number of total flips the program will ask for a "streak goal"
+since the final target for this simulation is based on luck it can take signifactly longer to complete than version 1
 '''
-
 from random import randint
 from time import time
 
-numRole=int(input("how many flips?\n\t"))
+streakGoal=int(input("How long do you want the streak to be?\n\t"))
 totalflips=0
 heads=0
 tails=0
@@ -17,8 +15,13 @@ streakHeadsRecord=0
 streakTailsRecord=0 
 startTime=time()
 
-while(numRole!=totalflips):
+while True:
+    if streakGoal <= streakHeadsRecord:
+        break
+    elif streakGoal <= streakTailsRecord:
+        break
     totalflips+=1
+    print("Running cycle: "+str(totalflips))
     flip=randint(0,1)
     if flip == 0:
         heads+=1
@@ -34,7 +37,7 @@ while(numRole!=totalflips):
             streakTailsRecord=streakTails
 finalTime=int(time()-startTime)
 
-print("With "+ str(numRole)+" total flips, you had "+str(heads)+" heads and "+str(tails)+" tails")
-print("You'r best heads streak was "+str(streakHeadsRecord)+" long and you longest tails streak was "+str(streakTailsRecord))
+print("It took "+str(totalflips)+" flips to reach a streak of "+str(streakGoal))
+print("The best heads streak was "+str(streakHeadsRecord)+" and the best tails streak was "+str(streakTailsRecord))
 if finalTime>0:
     print("This took "+str(finalTime)+" second(s)") 
