@@ -1,6 +1,11 @@
 '''
-version 3.1
-now writes output as csv files instead of plaintext
+version 3.2
+updated code so the main section is a function
+this is to start trying to inegrate the multiprocessing module to speed up the code
+'''
+'''
+well that took almost nothing
+probably didnt need to give it its own version but whatever
 '''
 from random import randint
 import time
@@ -27,19 +32,16 @@ while True:
         print("Made new log folder") 
 
 print("beginning run")
-absolutetime=time.time()
 counter=0
 
-while goal>counter:
-    counter+=1
-    print("Beginning cycle {}".format(counter))
+#function
+def flipper():
     totalflips=0
     streakHeads=0
     streakTails=0
     streakHeadsRecord=0
     streakTailsRecord=0 
     startTime=time.time()*1000000
-
     while True:
         if streakGoal <= streakHeadsRecord:
             break
@@ -61,6 +63,12 @@ while goal>counter:
     with open(filename, 'a') as file:
         file.write("{},{},{},{},{}\n".format(counter,totalflips,streakHeadsRecord,streakTailsRecord,finalTime))
 
+absolutetime=time.time()
+while goal>counter:
+    counter+=1
+    print("Beginning cycle {}".format(counter))
+    flipper()
+
 with open(filename, 'a') as file:
     goal1=goal+1
     file.write("Final,=AVERAGE(B2:B{}),=AVERAGE(C2:C{}),=AVERAGE(D2:D{}),{}\n".format(goal1,goal1,goal1,(time.time()-absolutetime)*1000000))
@@ -68,4 +76,3 @@ with open(filename, 'a') as file:
     file.write('MIN,=MIN(B2:B{}),=MIN(C2:C{}),=MIN(D2:D{}),\n'.format(goal1,goal1,goal1))
     file.write('MAX,=MAX(B2:B{})\n'.format(goal1))
 print("\nResults are in logfile{}".format(filecounter))
-
