@@ -1,15 +1,11 @@
 '''
-version 3.2
-updated code so the main section is a function
-this is to start trying to inegrate the multiprocessing module to speed up the code
-'''
-'''
-well that took almost nothing
-probably didnt need to give it its own version but whatever
+trying to inigrate basic multiprocessing to accelerate code execution 
 '''
 from random import randint
 import time
 import os
+
+import multiprocessing 
 
 #user inputs
 streakGoal=int(input("How long do you want the streak to be?\n\t"))
@@ -65,10 +61,22 @@ def flipper():
 
 absolutetime=time.time()
 while goal>counter:
-    counter+=1
+    counter+=2
     print("Beginning cycle {}".format(counter))
-    flipper()
-
+    if __name__ == "__main__": 
+        # creating processes 
+        p1 = multiprocessing.Process(target=flipper)
+        p2 = multiprocessing.Process(target=flipper)
+        # starting process 1 
+        p1.start() 
+        # starting process 2 
+        p2.start() 
+      
+        # wait until process 1 is finished 
+        p1.join() 
+        # wait until process 2 is finished 
+        p2.join() 
+        
 with open(filename, 'a') as file:
     goal1=goal+1
     file.write("Final,=AVERAGE(B2:B{}),=AVERAGE(C2:C{}),=AVERAGE(D2:D{}),{}\n".format(goal1,goal1,goal1,(time.time()-absolutetime)*1000000))
