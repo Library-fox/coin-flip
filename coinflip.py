@@ -1,14 +1,13 @@
 '''
-version 5.1
+version 5.2
 starting over from version 3.2 with multi processing,
-this time trying to use the multiprocessing.pool function to get stuff done
+this time trying to use the multiprocessing.pool function to get stuff doen
 '''
 '''
-it works for the most part
-for some reason it cuts off the last 2 runs so that i need to find out why or just compinsate for it
-because i can just add two to the goals bit and that should work
-couple other things need fixxing/ changing, mostly minor but still there
-ill try and fix those bugs in 5.2
+HEAHAHA it works!
+it finally correctly works
+woooo
+nice
 '''
 from random import randint
 from random import seed
@@ -20,8 +19,8 @@ import multiprocessing
 seed(1)
 
 #function
-def flipper(gl,filename1):
-    print("Beginning cycle {}".format(gl+1))
+def flipper(gl,filename1,c):
+    print("Beginning cycle {}".format(c))
     totalflips=0
     streakHeads=0
     streakTails=0
@@ -47,7 +46,7 @@ def flipper(gl,filename1):
                 streakTailsRecord=streakTails
     finalTime=(time.time()*1000000)-startTime
     with open(filename1, 'a') as file:
-        file.write("{},{},{},{},{}\n".format(gl+1,totalflips,streakHeadsRecord,streakTailsRecord,finalTime))
+        file.write("{},{},{},{},{}\n".format(c,totalflips,streakHeadsRecord,streakTailsRecord,finalTime))
 
 if __name__ == "__main__": 
     #user inputs
@@ -81,8 +80,8 @@ if __name__ == "__main__":
     # map list to target function
     goalls=[]
     for i in range(goal):
-        goalls.append((streakGoal, filename))
-    print(goalls)
+        goalls.append((streakGoal, filename,i+1))
+    #print(goalls)
     result = p.starmap(flipper, goalls)
 
     with open(filename, 'a') as file:
@@ -92,4 +91,5 @@ if __name__ == "__main__":
         file.write('MIN,=MIN(B2:B{g}),=MIN(C2:C{g}),=MIN(D2:D{g}),\n'.format(g=goal1))
         file.write('MAX,=MAX(B2:B{})\n'.format(goal1))
     print("\nResults are in logfile{}".format(filecounter))
+
 
