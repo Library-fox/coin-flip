@@ -1,17 +1,53 @@
 '''
-version 4.1
-trying to inigrate basic multiprocessing to accelerate code execution
+version 5.1
+starting over from version 3.2 with multi processing,
+this time trying to use the multiprocessing.pool function to get stuff done
 '''
 '''
-well, that went terribly
-but it works, sure its slower than it was before but hey it works!
-onto the next version where ill scrap all that i just did and start over with the multi procressing.
+it works for the most part
+for some reason it cuts off the last 2 runs so that i need to find out why or just compinsate for it
+because i can just add two to the goals bit and that should work
+couple other things need fixxing/ changing, mostly minor but still there
+ill try and fix those bugs in 5.2
 '''
 from random import randint
+from random import seed
 import time
 import os
 import multiprocessing
-import workingfunction
+
+#temp seed
+seed(1)
+
+#function
+def flipper(gl,filename1):
+    print("Beginning cycle {}".format(gl+1))
+    totalflips=0
+    streakHeads=0
+    streakTails=0
+    streakHeadsRecord=0
+    streakTailsRecord=0 
+    startTime=time.time()*1000000
+    while True:
+        if gl <= streakHeadsRecord:
+            break
+        elif gl <= streakTailsRecord:
+            break
+        totalflips+=1
+        flip=randint(0,1)
+        if flip == 0:
+            streakHeads+=1
+            streakTails=0
+            if streakHeads > streakHeadsRecord:
+                streakHeadsRecord=streakHeads
+        elif flip == 1:
+            streakTails+=1
+            streakHeads=0
+            if streakTails > streakTailsRecord:
+                streakTailsRecord=streakTails
+    finalTime=(time.time()*1000000)-startTime
+    with open(filename1, 'a') as file:
+        file.write("{},{},{},{},{}\n".format(gl+1,totalflips,streakHeadsRecord,streakTailsRecord,finalTime))
 
 if __name__ == "__main__": 
     #user inputs
@@ -26,47 +62,34 @@ if __name__ == "__main__":
             filename='log-folder\logfile{}.csv'.format(filecounter)
             with open(filename,'x') as file:
                 file.write("New run started on: {}".format(time.asctime()))
-                file.write("thread,flips,heads,tails,time in microseconds\n")
+                file.write("cycle,flips,heads,tails,time in microseconds\n")
             break
         except FileExistsError:
             filecounter+=1
         except FileNotFoundError:
             os.mkdir('log-folder')
-            print("Made new log folder") z
+            print("Made new log folder") 
 
     print("beginning run")
-    counter=0
 
+    corenum=multiprocessing.cpu_count()-1
+    print('{} available CPU threads.'.format(corenum))
 
-    #marks simulation start time
     absolutetime=time.time()
+    # creating a pool object 
+    p = multiprocessing.Pool(processes=corenum)
+    # map list to target function
+    goalls=[]
+    for i in range(goal):
+        goalls.append((streakGoal, filename))
+    print(goalls)
+    result = p.starmap(flipper, goalls)
 
-
-    while goal>counter:
-
-        
-        #creating process 1
-        counter+=1
-        p1 = multiprocessing.Process(target=workingfunction.flipper,args=(streakGoal,filename,counter))
-        p1.start()
-        print("Beginning cycle {}".format(counter))
-        
-        #creating process 2
-        counter+=1
-        p2 = multiprocessing.Process(target=workingfunction.flipper,args=(streakGoal,filename,counter))
-        p2.start()
-        print("Beginning cycle {}".format(counter))
-
-        # wait until process 1 is finished 
-        p1.join() 
-        # wait until process 2 is finished 
-        p2.join() 
-            
     with open(filename, 'a') as file:
         goal1=goal+1
-        file.write("Final,=AVERAGE(B2:B{}),=AVERAGE(C2:C{}),=AVERAGE(D2:D{}),{}\n".format(goal1,goal1,goal1,(time.time()-absolutetime)*1000000))
-        file.write('MAD,=AVEDEV(B2:B{}),=AVEDEV(C2:C{}),=AVEDEV(D2:D{}),\n'.format(goal1,goal1,goal1))
-        file.write('MIN,=MIN(B2:B{}),=MIN(C2:C{}),=MIN(D2:D{}),\n'.format(goal1,goal1,goal1))
+        file.write("Final,=AVERAGE(B2:B{arg1}),=AVERAGE(C2:C{arg1}),=AVERAGE(D2:D{arg1}),{t}\n".format(arg1=goal1,t=(time.time()-absolutetime)*1000000))
+        file.write('MAD,=AVEDEV(B2:B{g}),=AVEDEV(C2:C{g}),=AVEDEV(D2:D{g}),\n'.format(g=goal1))
+        file.write('MIN,=MIN(B2:B{g}),=MIN(C2:C{g}),=MIN(D2:D{g}),\n'.format(g=goal1))
         file.write('MAX,=MAX(B2:B{})\n'.format(goal1))
     print("\nResults are in logfile{}".format(filecounter))
-     
+
