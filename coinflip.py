@@ -1,13 +1,6 @@
 '''
-version 5.2
-starting over from version 3.2 with multi processing,
-this time trying to use the multiprocessing.pool function to get stuff doen
-'''
-'''
-HEAHAHA it works!
-it finally correctly works
-woooo
-nice
+version 6.1
+changing the way results are written into the file to help prevent the any possible issues with simulataniums writes
 '''
 from random import randint
 from random import seed
@@ -21,6 +14,7 @@ seed(1)
 #function
 def flipper(gl,filename1,c):
     print("Beginning cycle {}".format(c))
+    rename=filename1+'\\cycle{}.TXT'.format(c)
     totalflips=0
     streakHeads=0
     streakTails=0
@@ -45,7 +39,7 @@ def flipper(gl,filename1,c):
             if streakTails > streakTailsRecord:
                 streakTailsRecord=streakTails
     finalTime=(time.time()*1000000)-startTime
-    with open(filename1, 'a') as file:
+    with open(rename, 'x') as file:
         file.write("{},{},{},{},{}\n".format(c,totalflips,streakHeadsRecord,streakTailsRecord,finalTime))
 
 if __name__ == "__main__": 
@@ -54,20 +48,8 @@ if __name__ == "__main__":
     goal=int(input("how many times do you want to run the simulation?\n\t")) 
 
     #creats log file and creates directory if neceissary
-    filecounter=0
-    filename=''
-    while True:
-        try:
-            filename='log-folder\logfile{}.csv'.format(filecounter)
-            with open(filename,'x') as file:
-                file.write("New run started on: {}".format(time.asctime()))
-                file.write("cycle,flips,heads,tails,time in microseconds\n")
-            break
-        except FileExistsError:
-            filecounter+=1
-        except FileNotFoundError:
-            os.mkdir('log-folder')
-            print("Made new log folder") 
+    filename1='tempfile'
+    os.mkdir(filename1)
 
     print("beginning run")
 
@@ -75,21 +57,47 @@ if __name__ == "__main__":
     print('{} available CPU threads.'.format(corenum))
 
     absolutetime=time.time()
+    
     # creating a pool object 
     p = multiprocessing.Pool(processes=corenum)
     # map list to target function
     goalls=[]
     for i in range(goal):
-        goalls.append((streakGoal, filename,i+1))
-    #print(goalls)
+        goalls.append((streakGoal, filename1,i+1))
     result = p.starmap(flipper, goalls)
-
+    
+    #pulls results into a single csv file
+    filecounter=0
+    filename=''
+    while True:
+        try:
+            filename='results-log\logfile{}.csv'.format(filecounter)
+            with open(filename,'x') as file:
+                file.write("started on {}".format(time.asctime()))
+                file.write("cycle,flips,heads,tails,time in microseconds\n")
+            break
+        except FileExistsError:
+            filecounter+=1
+        except FileNotFoundError:
+            os.mkdir('results-log')
+            print("Made new results folder") 
+    
     with open(filename, 'a') as file:
+        for i in range(goal):
+            fileread=''
+            namey=filename1+'\\cycle{}.TXT'.format(i+1)
+            with open(namey, 'r') as readfile:
+                fileread=readfile.readline()
+            os.remove(namey)
+            file.write(fileread)
+            
+    with open(filename, 'a') as file:            
         goal1=goal+1
         file.write("Final,=AVERAGE(B2:B{arg1}),=AVERAGE(C2:C{arg1}),=AVERAGE(D2:D{arg1}),{t}\n".format(arg1=goal1,t=(time.time()-absolutetime)*1000000))
         file.write('MAD,=AVEDEV(B2:B{g}),=AVEDEV(C2:C{g}),=AVEDEV(D2:D{g}),\n'.format(g=goal1))
         file.write('MIN,=MIN(B2:B{g}),=MIN(C2:C{g}),=MIN(D2:D{g}),\n'.format(g=goal1))
         file.write('MAX,=MAX(B2:B{})\n'.format(goal1))
     print("\nResults are in logfile{}".format(filecounter))
+    os.rmdir(filename1)
 
 
