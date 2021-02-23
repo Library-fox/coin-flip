@@ -1,12 +1,17 @@
 '''
-version 6.1
-changing the way results are written into the file to help prevent the any possible issues with simulataniums writes
+version 7.1
+changing some stuff with the results log
+formating, data included etc
+nothing to to major
+also changed/updated some of the comments 
 '''
 from random import randint
 from random import seed
 import time
 import os
-import multiprocessing
+from multiprocessing import Pool, cpu_count
+
+beginTime=time.asctime()
 
 #function
 def flipper(gl,filename1,c):
@@ -15,9 +20,11 @@ def flipper(gl,filename1,c):
     totalflips=0
     streakHeads=0
     streakTails=0
+    heads=0
+    tails=0
     streakHeadsRecord=0
     streakTailsRecord=0 
-    startTime=time.time()*1000000
+    startTime=time.time()
     while True:
         if gl <= streakHeadsRecord:
             break
@@ -28,36 +35,37 @@ def flipper(gl,filename1,c):
         if flip == 0:
             streakHeads+=1
             streakTails=0
+            heads+=1
             if streakHeads > streakHeadsRecord:
                 streakHeadsRecord=streakHeads
         elif flip == 1:
             streakTails+=1
             streakHeads=0
+            tails+=1
             if streakTails > streakTailsRecord:
                 streakTailsRecord=streakTails
-    finalTime=(time.time()*1000000)-startTime
+    finalTime=time.time()-startTime
     with open(rename, 'x') as file:
-        file.write("{},{},{},{},{}\n".format(c,totalflips,streakHeadsRecord,streakTailsRecord,finalTime))
+        file.write("{},{},{},{},{}\n".format(c,totalflips,heads,tails,finalTime))
 
 if __name__ == "__main__": 
     #user inputs
     streakGoal=int(input("How long do you want the streak to be?\n\t"))
     goal=int(input("how many times do you want to run the simulation?\n\t")) 
 
-    #creats log file and creates directory if neceissary
+    #creats temporary write file
     filename1='tempfile'
     os.mkdir(filename1)
 
     print("beginning run")
 
-    corenum=multiprocessing.cpu_count()-1
+    corenum=cpu_count()-1
     print('{} available CPU threads.'.format(corenum))
 
     absolutetime=time.time()
     
-    # creating a pool object 
-    p = multiprocessing.Pool(processes=corenum)
-    # map list to target function
+    #creates and initiates pool
+    p = Pool(processes=corenum)
     goalls=[]
     for i in range(goal):
         goalls.append((streakGoal, filename1,i+1))
@@ -70,8 +78,8 @@ if __name__ == "__main__":
         try:
             filename='results-log\logfile{}.csv'.format(filecounter)
             with open(filename,'x') as file:
-                file.write("started on {}".format(time.asctime()))
-                file.write("cycle,flips,heads,tails,time in microseconds\n")
+                file.write("started on {}\n".format(beginTime))
+                file.write("cycle,total flips,heads,tails,cycle time (secs)\n")
             break
         except FileExistsError:
             filecounter+=1
@@ -87,14 +95,16 @@ if __name__ == "__main__":
                 fileread=readfile.readline()
             os.remove(namey)
             file.write(fileread)
-            
+    
+    #appends excel functions to the bottom of the file
     with open(filename, 'a') as file:            
-        goal1=goal+1
-        file.write("Final,=AVERAGE(B2:B{arg1}),=AVERAGE(C2:C{arg1}),=AVERAGE(D2:D{arg1}),{t}\n".format(arg1=goal1,t=(time.time()-absolutetime)*1000000))
-        file.write('MAD,=AVEDEV(B2:B{g}),=AVEDEV(C2:C{g}),=AVEDEV(D2:D{g}),\n'.format(g=goal1))
-        file.write('MIN,=MIN(B2:B{g}),=MIN(C2:C{g}),=MIN(D2:D{g}),\n'.format(g=goal1))
-        file.write('MAX,=MAX(B2:B{})\n'.format(goal1))
+        goal1=goal+2
+        file.write("Total,=SUM(B3:B{arg1}),=SUM(C3:C{arg1}),=SUM(D3:D{arg1}),{t}\n".format(arg1=goal1,t=(time.time()-absolutetime)))
+        file.write("Average,=AVERAGE(B3:B{arg1}),=AVERAGE(C3:C{arg1}),=AVERAGE(D3:D{arg1})\n".format(arg1=goal1))
+        file.write('MAD,=AVEDEV(B3:B{g}),=AVEDEV(C3:C{g}),=AVEDEV(D3:D{g}),\n'.format(g=goal1))
+        file.write('MIN,=MIN(B3:B{g}),=MIN(C3:C{g}),=MIN(D3:D{g}),\n'.format(g=goal1))
+        file.write('MAX,=MAX(B3:B{g}),=MAX(C3:C{g}),=MAX(D3:D{g})\n'.format(g=goal1))
     print("\nResults are in logfile{}".format(filecounter))
+    
+    #deletes temporary write file
     os.rmdir(filename1)
-
-
