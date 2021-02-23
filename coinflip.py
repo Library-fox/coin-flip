@@ -8,9 +8,6 @@ import time
 import os
 import multiprocessing
 
-#temp seed
-seed(1)
-
 #function
 def flipper(gl,filename1,c):
     print("Beginning cycle {}".format(c))
